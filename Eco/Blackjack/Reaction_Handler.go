@@ -67,7 +67,7 @@
   {{deleteMessageReaction nil .Message.ID .User.ID .Reaction.Emoji.Name}}
   {{$e.Set "fields" (cslice 
     (sdict "name" "Dealer's Hand" "value" (printf "Cards: %s\nValue: `%d`" (joinStr " " $db.D.C) $db.D.V) "inline" true) 
-    (sdict "name" (print .User.Globalname "'s Hand") "value" (printf "Cards: %s\nValue: `%d`"(joinStr " " $db.U.C) $db.U.V) "inline" true)
+    (sdict "name" (print .User.Globalname "'s Hand") "value" (printf "Cards: %s\nValue: `%d`" (joinStr " " $db.U.C) $db.U.V) "inline" true)
   )}}
   {{editMessage nil .Message.ID (cembed $e)}}
   {{if $end}}
