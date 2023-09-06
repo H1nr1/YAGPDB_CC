@@ -16,9 +16,15 @@
 
 {{$db:=or (dbGet 0 "Counting").Value (sdict "Last" (sdict "User" 204255221017214977 "Msg" 0) "Next" 1 "HighScore" (sdict "User" 204255221017214977 "Num" 1 "Time" currentTime) "SecondChance" 2)}}
 
-{{with .ExecData }}
-	{{if not (getMessage nil .)}} {{/* Check if message was deleted */}}
-		{{sendMessage nil (cembed "description" (print (userArg $db.Last.User).Mention " deleted their number which was correct!\nThe next number is " $db.Next) "color" 30654)}}
+{{with .ExecData}}
+	{{$foo:=""}}
+	{{if not (getMessage nil .ID)}} {{/* Check if message was deleted */}}
+		{{$foo ="deleted"}}
+	{{else if ne (getMessage nil .ID).Content .Content}} {{/* Check if message was edited */}}
+		{{$foo ="edited"}}
+	{{end}}
+	{{if $foo}}
+		{{sendMessage nil (cembed "description" (printf "%s %s their number which was correct!\nThe next number is %d" (userArg $db.Last.User).Mention $foo $db.Next) "color" 30654)}}
 	{{end}}
 	{{return}}
 {{end}}
@@ -48,7 +54,7 @@
 		{{if gt $Number $db.HighScore.Num}}{{$db.Set "HighScore" (sdict "User" .User.ID "Num" $Number "Time" currentTime)}}{{end}}
 	{{end}}
 	{{dbSet 0 "Counting" $db}}
-	{{execCC .CCID nil 10 .Message.ID}} {{/* Call to check if message was deleted */}}
+	{{execCC .CCID nil 10 .Message}} {{/* Call to check if message was edited/deleted */}}
 		
 {{else}} {{/* Wrong number */}}
 	{{$db.Set "SecondChance" (sub $db.SecondChance 1)}}
