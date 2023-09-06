@@ -4,7 +4,8 @@
 {{ $CountTwice := false }} {{/* Allow users to count multiple times in a row; true/false */}}
 {{ $CorrectRID := false }} {{/* Correct Counting role ID; set to false to disable */}}
 {{ $IncorrectRID := false }} {{/* Incorrect Counting role ID; set to false to disable */}}
-{{ $ErrorCID := 123replaceMe }} {{/* Channel ID to send errors to */}}
+{{ $ErrorCID := .Channel.ID }} {{/* Channel ID to send errors to */}}
+{{ $EditedMsgNoti := true }} {{/* Whether to send a message if a user edits their message; true/false */}}
 {{ $SecondChance := true }} {{/* Second chance if wrong; true/false */}}
 {{ $StatsCC := true }} {{/* If you added the Stats CC; true/false */}}
 {{ $Reactions := true }} {{/* Allow confirmative reactions on message; true false */}}
@@ -20,7 +21,7 @@
 	{{$foo:=""}}
 	{{if not (getMessage nil .ID)}} {{/* Check if message was deleted */}}
 		{{$foo ="deleted"}}
-	{{else if ne (getMessage nil .ID).Content .Content}} {{/* Check if message was edited */}}
+	{{else if and $EditedMsgNoti (ne (getMessage nil .ID).Content .Content)}} {{/* Check if message was edited */}}
 		{{$foo ="edited"}}
 	{{end}}
 	{{if $foo}}
