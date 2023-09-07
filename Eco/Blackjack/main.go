@@ -36,7 +36,7 @@
     {{$end:=false}}
     {{if eq $UV 21}}
       {{$:=dbIncr .User.ID "Wallet" (mult $Amt 4)}}
-      {{$e.Set "description" (printf "**%s has Blackjack and won %d coins!**" .User.Globalname (mult $Amt 4))}}{{$e.Del "footer"}}
+      {{$e.Set "description" (printf "**%s has Blackjack and won %s coins!**" .User.Globalname (mult $Amt 4|humanizeThousands))}}{{$e.Del "footer"}}
       {{$end =true}}
     {{end}}
     {{$ID:=sendMessageRetID nil (cembed $e)}}
