@@ -1,6 +1,6 @@
 {{/* Regex: `\A\-g(ive)?a(wa)?y?` */}}
 
-{{$Emoji:="🎉"}}
+{{$Emoji:="🎉"}} {{/* Emoji to use as reaction */}}
 
 {{if .ExecData}}
 	{{$G:=(dbGet .ExecData "Giveaways").Value}}
