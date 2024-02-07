@@ -1,23 +1,51 @@
-{{/* Regex: `\A\w+` */}}
+{{/* Regex \A\w+ */}}
+{{/* Restrict to One Word Story channel */}}
 
-{{$Sentence:=or (dbGet 0 "Sentence").Value (sdict "nil" "" "LastUser" 204255221017214977 "LastResp" 0)}}
-
-{{if eq .User.ID $Sentence.LastUser}}
-	Please wait your turn!
-	{{deleteTrigger 5}}{{deleteResponse 5}}
-	{{return}}
-{{else if ne (len .Args) 1}}
-	Please send one word at a time
-	{{deleteTrigger 5}}{{deleteResponse 5}}
+{{$sentence:=or 
+  	(dbGet 0 "oneWordStory").Value 
+ 	(sdict 
+  		"nil" "" 
+  		"last" (sdict 
+			"user" .BotUser.ID 
+  			"msg" 0
+		)
+	)
+ }}
+ 
+{{if eq .User.ID $sentence.last.user}}
+	Please wait your turn
+	{{deleteTrigger 1}}
+	{{deleteResponse 5}}
 	{{return}}
 {{end}}
 
-{{deleteMessage nil $Sentence.LastResp 0}}
-{{$Sentence.Set "nil" (joinStr " " $Sentence.nil (index .Args 0))}}
-{{if reFind `\.$` .Message.Content}}
-	{{sendMessage nil (cembed "title" "The sentence has concluded" "description" (printf "Final sentence was: `%s`" $Sentence.nil) "color" (randInt 0xFFFFFF))}}
-	{{dbDel 0 "Sentence"}}
+{{if reFind .LinkRegex .Message.Content}}
+	Links are not permitted
+	{{deleteTrigger 1}}
+	{{deleteResponse 5}}
+	{{return}}
+{{end}}
+
+{{if gt (len .Args) 1}}
+	Please only send one word at a time
+	{{deleteTrigger 1}}
+	{{deleteResponse 5}}
+	{{return}}
+{{end}}
+
+{{deleteMessage nil $sentence.last.msg 0}}
+{{index .Args 0|joinStr " " $sentence.nil|$sentence.Set "nil"}}
+
+{{if hasSuffix .Message.Content "."}}
+	{{printf "The sentence has concluded\nFinal sentence is: '%s'" $sentence.nil}}
+	{{dbDel 0 "oneWordStory"}}
 {{else}}
-	{{$Sentence.Set "LastResp" (sendMessageRetID nil (printf "The sentence is now: `%s`" $Sentence.nil))}}
-	{{dbSet 0 "Sentence" (sdict "nil" $Sentence.nil "LastUser" .User.ID "LastResp" $Sentence.LastResp)}}
+	{{sendMessageRetID nil (printf "The sentence is now: '%s'" $sentence.nil)|$sentence.last.Set "msg"}}
+	{{dbSet 0 "oneWordStory" (sdict 
+		"nil" $sentence.nil 
+		"last" (sdict 
+			"user" .User.ID 
+			"msg" $sentence.last.msg
+		)
+	)}}
 {{end}}
