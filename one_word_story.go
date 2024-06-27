@@ -33,6 +33,13 @@
 	{{return}}
 {{end}}
 
+{{if eq (exec "dictionary" .Cmd|str) "Could not find a definition for that word."}}
+	Invalid word
+	{{deleteTrigger 1}}
+	{{deleteResponse 5}}
+	{{return}}
+{{end}}
+
 {{deleteMessage nil $sentence.last.msg 0}}
 {{index .Args 0|joinStr " " $sentence.nil|$sentence.Set "nil"}}
 
